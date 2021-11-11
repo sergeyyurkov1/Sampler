@@ -6,14 +6,13 @@ import shutil
 import random
 import fitz
 
+CUR_DIR = os.path.dirname(__file__)
 OUT_DIR = "SAMPLE"
 
 week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
-dirname = os.path.dirname(__file__)
-
-ext = "rtf"
-# ext = "pdf"
+# ext = "rtf"
+ext = "pdf"
 
 num_constructed_weeks = 2
 
@@ -56,7 +55,7 @@ def sort():
         
         # Sorting docs by weekday
         print(f"Sorting {e+1}/{len(files)}") # simple progress bar
-        shutil.move(os.path.join(dirname, i), os.path.join(dirname, f"{weekday}/{i}")) # moves the doc to its respective weekday folder
+        shutil.move(os.path.join(CUR_DIR, i), os.path.join(CUR_DIR, f"{weekday}/{i}")) # moves the doc to its respective weekday folder
 
 def sample():
     """Performs constructed week sampling from sorted documents with n-weeks"""
@@ -66,7 +65,7 @@ def sample():
     for day in week:
         hat = []
 
-        dir_listing = os.scandir(os.path.join(dirname, day))
+        dir_listing = os.scandir(os.path.join(CUR_DIR, day))
         for i in dir_listing:
             if i.is_file():
                 hat.append(i.name)
@@ -76,11 +75,11 @@ def sample():
         if len(hat) >= num_constructed_weeks:
             sample = random.sample(hat, num_constructed_weeks)
             for n in sample:
-                shutil.move(os.path.join(dirname, f"{day}/{n}"), os.path.join(dirname, f"{OUT_DIR}/{n}")) # Moves sampled docs to the output directory
+                shutil.move(os.path.join(CUR_DIR, f"{day}/{n}"), os.path.join(CUR_DIR, f"{OUT_DIR}/{n}")) # Moves sampled docs to the output directory
         elif 0 < len(hat) < num_constructed_weeks:
             print(f"Warning: using whole day's population for {day}")
             for N in hat:
-                shutil.move(os.path.join(dirname, f"{day}/{N}"), os.path.join(dirname, f"{OUT_DIR}/{N}")) # Moves docs to the output directory
+                shutil.move(os.path.join(CUR_DIR, f"{day}/{N}"), os.path.join(CUR_DIR, f"{OUT_DIR}/{N}")) # Moves docs to the output directory
         else:
             print(f"Warning: no documents found for {day}")
 
