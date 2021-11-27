@@ -11,8 +11,7 @@ OUT_DIR = "SAMPLE"
 
 week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
-# ext = "rtf"
-ext = "pdf"
+exts = ["rtf", "pdf"]
 
 num_constructed_weeks = 2
 
@@ -22,7 +21,7 @@ def main():
         if not os.path.isdir(dir_):
             os.mkdir(dir_)
         else:
-            print("Sampling was already done!")
+            print("Sampling had already been done!")
             exit()
     
     sort()
@@ -35,27 +34,32 @@ def sort():
 
     dir_listing = os.scandir()
     for i in dir_listing:
-        if i.is_file() and i.name.split(".")[-1].lower() == ext:
+        if i.is_file() and i.name.split(".")[-1].lower() in exts:
             files.append(i.name)
     dir_listing.close()
 
-    for e, i in enumerate(files):
-        if ext == "rtf":
-            with open(i, "r") as f:
-                text = f.read()
-        elif ext == "pdf":
-            f = fitz.open(i)
-            for page in f:
-                text = page.get_text("text")
-                break # we only need the first page to extract the weekday
-            f.close()
+    if len(files) > 0:
+        for e, i in enumerate(files):
+            ext = i.name.split(".")[-1].lower()
+            if ext == "rtf":
+                with open(i, "r") as f:
+                    text = f.read()
+            elif ext == "pdf":
+                f = fitz.open(i)
+                for page in f:
+                    text = page.get_text("text")
+                    break # we only need the first page to extract the weekday
+                f.close()
 
-        # Extracts a weekday from the following string format: "February 4, 2021 Thursday 7:45 AM GMT", as found in Lexis docs
-        weekday = re.search(r"[a-zA-Z]+\s\d{1,2},\s\d{4}\s([a-zA-Z]+)\s\d{1,2}:\d{2}\s[A-Z]{2}\s[A-Z]{3}", text).group(1)
-        
-        # Sorting docs by weekday
-        print(f"Sorting {e+1}/{len(files)}") # simple progress bar
-        shutil.move(os.path.join(CUR_DIR, i), os.path.join(CUR_DIR, f"{weekday}/{i}")) # moves the doc to its respective weekday folder
+            # Extracts weekday from the following string format: "February 4, 2021 Thursday 7:45 AM GMT" (as found in Lexis docs)
+            weekday = re.search(r"[a-zA-Z]+\s\d{1,2},\s\d{4}\s([a-zA-Z]+)\s\d{1,2}:\d{2}\s[A-Z]{2}\s[A-Z]{3}", text).group(1)
+            
+            # Sorting docs by weekday
+            print(f"Sorting {e+1}/{len(files)}") # simple progress bar
+            shutil.move(os.path.join(CUR_DIR, i), os.path.join(CUR_DIR, f"{weekday}/{i}")) # moves the doc to its respective weekday folder
+    else:
+        print("No files to sort!")
+        exit()
 
 def sample():
     """Performs constructed week sampling from sorted documents with n-weeks"""
