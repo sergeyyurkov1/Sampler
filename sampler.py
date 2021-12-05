@@ -13,7 +13,7 @@ WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sun
 
 EXTS = ["rtf", "pdf"]
 
-num_constructed_weeks = 1
+num_constructed_weeks = 12
 
 def main():    
     sort()
@@ -41,9 +41,20 @@ def sort():
                     text = page.get_text("text")
                     break # we only need the first page to extract the weekday
                 f.close()
-
+            
             # Extracts weekday from the following string format: "February 4, 2021 Thursday 7:45 AM GMT" (as found in Lexis docs)
-            date, weekday = re.search(r"([a-zA-Z]+\s\d{1,2}),\s\d{4}\s([a-zA-Z]+)\s\d{1,2}:\d{2}\s[A-Z]{2}\s[A-Z]{3}", text).groups()
+            from dateutil import parser
+            # try:
+            #   date, weekday = re.search(r"([a-zA-Z]+\s\d{1,2}),\s\d{4}\s([a-zA-Z]+)", text).groups() # \s\d{1,2}:\d{2}\s[A-Z]{2}\s[A-Z]{3}
+            # except AttributeError:
+            try:
+              date = re.search(r"([a-zA-Z]+\s\d{1,2}),\s\d{4}", text).group(0)
+              weekday = parser.parse(date).strftime("%A")
+              # print(date, weekday)
+            except AttributeError:
+              date = re.search(r"\d{1,2}\s[a-zA-Z]+\s\d{4}", text).group(0)
+              weekday = parser.parse(date).strftime("%A")
+              # print(date, weekday)
             
             # Sorting docs by weekday
             print(f"Sorting {e+1}/{len(files)}") # simple progress bar
