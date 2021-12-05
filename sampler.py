@@ -84,7 +84,7 @@ def sample():
             break
 
         # Checks whether the number of docs is enough for sampling n-weeks, otherwise uses the whole population, or errors out if no docs are found
-        if len(hat) >= num_constructed_weeks:
+        if len(hat) > num_constructed_weeks:
             sample = random.sample(hat, num_constructed_weeks)
             for n in sample:
                 dir_listing = os.scandir(os.path.join(CUR_DIR, day, n))
@@ -95,7 +95,7 @@ def sample():
                         os.makedirs(os.path.dirname(to), exist_ok=True)
                         shutil.move(from_, to) # Moves sampled docs to the output directory
                 dir_listing.close()
-        elif 0 < len(hat) < num_constructed_weeks:
+        elif 0 < len(hat) <= num_constructed_weeks:
             print(f"Warning: using whole day's population for {day}")
             for N in hat:
                 dir_listing = os.scandir(os.path.join(CUR_DIR, day, N))
