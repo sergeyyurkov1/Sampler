@@ -1,25 +1,27 @@
-#! python3
+# python -m pip install --upgrade pymupdf
 
-# python -m pip install --upgrade pymupdf python-docx
-
-import os, re, shutil, random
-import fitz, docx
+import os
+import re
+import shutil
+import random
+import fitz
 
 CUR_DIR = os.path.dirname(__file__)
 OUT_DIR = "SAMPLE"
+
 WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-EXTS = ["rtf", "pdf", "docx"]
+EXTS = ["rtf", "pdf"]
 
 num_constructed_weeks = 6
 
-def main():
+def main():    
     sort()
-    reduce(2)
     sample()
 
 def sort():
     """Finds and sorts all rtf or pdf files in the working directory by weekday and date"""
     files = []
+
     dir_listing = os.scandir()
     for i in dir_listing:
         if i.is_file() and i.name.split(".")[-1].lower() in EXTS and "doclist" not in i.name.lower():
@@ -38,9 +40,6 @@ def sort():
                     text = page.get_text("text")
                     break # we only need the first page
                 f.close()
-            elif ext == "docx":
-                document = docx.Document(i)
-                text = "\n".join([ paragraph.text for paragraph in document.paragraphs ])
             
             # Extracts and parses the date
             from dateutil import parser
@@ -67,6 +66,7 @@ def sample():
 
     for day in WEEK:
         hat = []
+
         try:
             dir_listing = os.scandir(os.path.join(CUR_DIR, day))
             for i in dir_listing:
@@ -107,46 +107,28 @@ def sample():
     print("Done!")
 
 def reduce(by):
-    """Reduces the population by x before sampling"""
-    print("Reducing...")
+    hat = []
 
-    # hat = []
-    # try:
-    #     dir_listing = os.scandir(os.path.join(CUR_DIR, OUT_DIR))
-    #     for i in dir_listing:
-    #         if i.is_file():
-    #             hat.append(i.name)
-    #     dir_listing.close()
-    # except FileNotFoundError:
-    #     print(f"Warning: no documents found! Exiting.")
-    #     exit()
-    # reduced_sample = random.sample(hat, int(len(hat)/by))
-    # for i in reduced_sample:
-    #     from_ = os.path.join(CUR_DIR, OUT_DIR, i)
-    #     to = os.path.join(CUR_DIR, OUT_DIR, "DISCARDED", i)
-    #     os.makedirs(os.path.dirname(to), exist_ok=True)
-    #     shutil.move(from_, to) # Moves sampled docs to the output directory
+    try:
+        dir_listing = os.scandir(os.path.join(CUR_DIR, OUT_DIR))
+        for i in dir_listing:
+            if i.is_file():
+                hat.append(i.name)
+        dir_listing.close()
+    except FileNotFoundError:
+        print(f"Warning: no documents found! Exiting.")
+        exit()
+    
+    reduced_sample = random.sample(hat, int(len(hat)/by))
+    for i in reduced_sample:
+        from_ = os.path.join(CUR_DIR, OUT_DIR, i)
+        to = os.path.join(CUR_DIR, OUT_DIR, "DISCARDED", i)
+        os.makedirs(os.path.dirname(to), exist_ok=True)
+        shutil.move(from_, to) # Moves sampled docs to the output directory
 
-    for day in WEEK:
-        try:
-            with os.scandir(os.path.join(CUR_DIR, day)) as dir_listing:
-                for i in dir_listing:
-                    if i.is_dir():
-                        hat = []
-                        with os.scandir(i.path) as subdir_listing:
-                            for j in subdir_listing:
-                                if j.is_file():
-                                    hat.append(j.name)
-                        if len(hat) > 1:
-                            reduced_sample = random.sample(hat, round(len(hat)/by))
-                            for file in reduced_sample:
-                                from_ = os.path.join(CUR_DIR, day, i, file)
-                                to = os.path.join(CUR_DIR, day, i, "DISCARDED", file)
-                                os.makedirs(os.path.dirname(to), exist_ok=True)
-                                shutil.move(from_, to) # Moves sampled docs to the output directory
-        except FileNotFoundError:
-            print(f"Warning: no documents found for {day}")
-            break
+    print("Done!")
 
 if __name__ == "__main__":
-    main()
+    # main()
+    # reduce(2)
+    print()
