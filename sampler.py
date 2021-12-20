@@ -27,7 +27,10 @@ def sort():
     dir_listing.close()
 
     if len(files) > 0:
-        for e, i in enumerate(files):
+        from tqdm import tqdm
+        pbar = tqdm(files, bar_format="{l_bar}{bar}", ncols=50)
+        for i in pbar:
+            pbar.set_description(f"Sorting {len(files)}")
             ext = i.split(".")[-1].lower()
             if ext == "rtf":
                 with open(i, "r") as f:
@@ -52,7 +55,7 @@ def sort():
               weekday = parser.parse(date).strftime("%A")
             
             # Sorting docs by weekday
-            print(f"Sorting {e+1}/{len(files)}") # simple progress bar
+            # print(f"Sorting {e+1}/{len(files)}") # simple progress bar
             from_ = os.path.join(CUR_DIR, i)
             to = os.path.join(CUR_DIR, weekday, date, i)
             os.makedirs(os.path.dirname(to), exist_ok=True)
@@ -145,8 +148,7 @@ def reduce(by):
                                 os.makedirs(os.path.dirname(to), exist_ok=True)
                                 shutil.move(from_, to) # Moves sampled docs to the output directory
         except FileNotFoundError:
-            print(f"Warning: no documents found for {day}")
-            break
+            pass
 
 if __name__ == "__main__":
     main()
